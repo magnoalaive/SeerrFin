@@ -22,6 +22,8 @@ a[data-seerrfin-menu-nav]:focus-visible {
 
 .seerrfin-box-card--logo .cardBox {
     background: var(--jf-palette-background-paper, rgba(255, 255, 255, 0.03));
+    border-radius: 0.5em;
+    overflow: hidden;
 }
 
 .seerrfin-box-card--logo .seerrfin-discover-backdrop-image {
