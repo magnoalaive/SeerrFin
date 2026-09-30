@@ -124,7 +124,24 @@ public static class SeerrFinTabConfigHelper
 
         foreach (SeerrFinTabConfig tab in SeerrFinTabConfig.CreateDefaults())
         {
-            TryAdd(SeerrFinKey(tab.Id));
+            string key = SeerrFinKey(tab.Id);
+            if (seen.Contains(key))
+            {
+                continue;
+            }
+
+            if (tab.Id == "discover")
+            {
+                int requestsIndex = result.FindIndex(item => string.Equals(item, SeerrFinKey("requests"), StringComparison.OrdinalIgnoreCase));
+                if (requestsIndex >= 0)
+                {
+                    seen.Add(key);
+                    result.Insert(requestsIndex, key);
+                    continue;
+                }
+            }
+
+            TryAdd(key);
         }
 
         return result;

@@ -834,6 +834,23 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="bst-card bst-seerrfin-tab-card" data-bst-tab-id="discover">
+                            <div class="bst-toggle-row">
+                                <div class="bst-toggle-copy">
+                                    <label class="bst-tab-enable-label" for="bstTabTitle_discover">
+                                        <span>Enable</span>
+                                        <input id="bstTabTitle_discover" type="text" class="bst-tab-title-input" data-bst-tab-title="discover" value="Discover" maxlength="40" aria-label="Discover tab name" />
+                                        <span>tab</span>
+                                    </label>
+                                </div>
+                                <div class="bst-toggle-actions">
+                                    <label class="bst-toggle" for="bstTabEnabled_discover" aria-label="Enable Discover tab">
+                                        <input id="bstTabEnabled_discover" type="checkbox" data-bst-tab-enabled="discover" />
+                                        <span class="bst-toggle-slider bst-tab-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                         <div class="bst-card bst-seerrfin-tab-card" data-bst-tab-id="requests">
                             <div class="bst-toggle-row">
                                 <div class="bst-toggle-copy">
@@ -1803,13 +1820,14 @@
             const TAB_TITLES = {
                 movies: 'Movies',
                 tv: 'TV Shows',
+                discover: 'Discover',
                 requests: 'Requests',
                 letterboxd: 'Letterboxd'
             };
 
             function createDefaultTabs() {
                 return Object.keys(TAB_TITLES).map(function (id) {
-                    return { Id: id, Enabled: true, Title: TAB_TITLES[id] };
+                    return { Id: id, Enabled: id !== 'discover', Title: TAB_TITLES[id] };
                 });
             }
 

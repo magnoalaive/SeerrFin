@@ -10,10 +10,43 @@ a[data-seerrfin-menu-nav]:focus-visible {
 
 .seerrfin-movies-sections,
 .seerrfin-tv-sections,
+.seerrfin-discover-sections,
 .seerrfin-requests-sections,
 .seerrfin-search-section {
     --seerrfin-discover-backdrop-width: 20em;
     --seerrfin-discover-portrait-width: 13.333em;
+}
+
+.seerrfin-discover-filters {
+    display: flex;
+    gap: 1.25em;
+    margin-bottom: 1em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.65em;
+}
+
+.seerrfin-discover-filter {
+    padding: 0.35em 0;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--secondaryTextColor, rgba(255, 255, 255, 0.6));
+    cursor: pointer;
+    font: inherit;
+}
+
+.seerrfin-discover-filter:hover,
+.seerrfin-discover-filter:focus-visible,
+.seerrfin-discover-filter.is-active {
+    color: var(--primaryTextColor, #fff);
+}
+
+.seerrfin-discover-filter.is-active {
+    border-bottom-color: var(--accentTextColor, var(--buttonBackground, #00a4dc));
+}
+
+.seerrfin-discover-body[hidden] {
+    display: none;
 }
 
 .seerrfin-box-card {
@@ -186,6 +219,24 @@ a[data-seerrfin-menu-nav]:focus-visible {
     display: flex;
     align-items: baseline;
     gap: 0.75em;
+}
+
+.seerrfin-discover-panel .sectionTitleContainer-cards {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+}
+
+.seerrfin-discover-requests {
+    margin-left: auto !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    flex: 0 0 auto;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0.35em 0.65em !important;
+    line-height: 1.2 !important;
 }
 
 .seerrfin-search-section {
@@ -372,9 +423,11 @@ a[data-seerrfin-menu-nav]:focus-visible {
 /* ElegantFin fixes */
 html.seerrfin-elegantfin .seerrfin-movies-sections .seerrfin-discover-card,
 html.seerrfin-elegantfin .seerrfin-tv-sections .seerrfin-discover-card,
+html.seerrfin-elegantfin .seerrfin-discover-sections .seerrfin-discover-card,
 html.seerrfin-elegantfin .seerrfin-search-section .seerrfin-discover-card,
 html.seerrfin-elegantfin .seerrfin-movies-sections .seerrfin-box-card,
 html.seerrfin-elegantfin .seerrfin-tv-sections .seerrfin-box-card,
+html.seerrfin-elegantfin .seerrfin-discover-sections .seerrfin-box-card,
 html.seerrfin-elegantfin .seerrfin-grid-view .seerrfin-discover-card,
 html.seerrfin-elegantfin [data-seerrfin-skeleton-card] {
     padding: 0 !important;
@@ -387,6 +440,7 @@ html.seerrfin-elegantfin .seerrfin-discover-card--backdrop {
 
 html.seerrfin-elegantfin .seerrfin-poster-section .seerrfin-discover-card:not(.seerrfin-discover-card--backdrop),
 html.seerrfin-elegantfin .seerrfin-grid-view .seerrfin-discover-card:not(.seerrfin-discover-card--backdrop),
+html.seerrfin-elegantfin .seerrfin-discover-sections .seerrfin-discover-card:not(.seerrfin-discover-card--backdrop),
 html.seerrfin-elegantfin .seerrfin-search-section .seerrfin-discover-card:not(.seerrfin-discover-card--backdrop) {
     width: var(--seerrfin-discover-portrait-width) !important;
 }
@@ -408,6 +462,15 @@ html.seerrfin-elegantfin .seerrfin-tv-sections .sectionTitleContainer-cards {
 
 html.seerrfin-elegantfin .seerrfin-movies-sections .sectionTitleContainer-cards .sectionTitle-cards,
 html.seerrfin-elegantfin .seerrfin-tv-sections .sectionTitleContainer-cards .sectionTitle-cards {
+    margin: 0 !important;
+    padding-top: 0 !important;
+}
+
+html.seerrfin-elegantfin .seerrfin-discover-panel .sectionTitleContainer-cards {
+    margin: 0 !important;
+}
+
+html.seerrfin-elegantfin .seerrfin-discover-panel .sectionTitleContainer-cards .sectionTitle-cards {
     margin: 0 !important;
     padding-top: 0 !important;
 }

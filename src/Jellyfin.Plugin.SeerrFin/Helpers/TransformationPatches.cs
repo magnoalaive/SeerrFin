@@ -48,6 +48,7 @@ public static class TransformationPatches
                 {
                     "movies" => "movie",
                     "tv" => "tv",
+                    "discover" => "explore",
                     "requests" => "download",
                     _ => "bookmark"
                 },
