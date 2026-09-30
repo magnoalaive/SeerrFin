@@ -1,14 +1,14 @@
 {
   "category": "General",
-  "changelog": "Added optional combined 'Discover' tab in which both movies and series content can be seen. Changes by @edmogeor",
+  "changelog": "Make sure the active SeerrFin tab is visibly shown in Jellyfin Modern navigation. Changes by @edmogeor",
   "description": "The best way to discover and request Movies and TV Shows through Seerr directly in Jellyfin.",
   "guid": "c8e4f2a1-9b3d-4e7f-a6c2-1d5e8f0a3b7c",
   "name": "SeerrFin",
   "overview": "This plugin lets you add two extra tabs to your top bar, allowing you to discover new Movies and TV Shows, and easily request them in any quality profile you want.",
   "owner": "varunaditya-plus",
   "targetAbi": "12.0.0.0",
-  "timestamp": "2026-09-30T01:29:43.0000000Z",
-  "version": "1.7.3.0",
+  "timestamp": "2026-09-30T01:35:28.0000000Z",
+  "version": "1.7.3.1",
   "status": "Active",
   "autoUpdate": true,
   "assemblies": [
