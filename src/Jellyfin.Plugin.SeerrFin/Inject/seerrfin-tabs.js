@@ -397,9 +397,8 @@ if (typeof window.seerrFinPlugin === 'undefined') {
                 if (!self.isHomeTabContext()) {
                     return;
                 }
-                const route = new URLSearchParams(window.location.hash.split('?')[1] || '');
                 const button = event.target.closest && event.target.closest('.emby-tab-button');
-                if ((!route.has('seerrfinTab') && !route.has('tab')) || !button || button.classList.contains('hide')) {
+                if (!button || button.classList.contains('hide')) {
                     return;
                 }
                 const id = button.getAttribute('data-seerrfin-tab');
@@ -407,7 +406,7 @@ if (typeof window.seerrFinPlugin === 'undefined') {
                 if (isNaN(index)) {
                     return;
                 }
-                // Legacy tab clicks do not update the route, so keep a home deep link in sync so a later header refresh cant restore the tab just left
+                // Legacy tab clicks do not update the route. Keep selections bookmarkable, including from plain #/home.
                 window.location.hash = id ? '#/home?seerrfinTab=' + id : (index === 0 ? '#/home' : '#/home?tab=' + index);
                 self.syncModernNavigation();
             }, true);
