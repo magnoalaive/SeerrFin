@@ -350,12 +350,7 @@ window.seerrFinLog = window.seerrFinLog || {
             : (info && info.status != null ? info.status : (data && data.status));
         const status = normalizeMediaStatus(raw);
 
-        // Seerr mediaInfo means HD was already requested
-        if (!is4k && info && (status == null || status <= 1)) {
-            return { requested: true, label: 'Already requested' };
-        }
-
-        // Deleted media can be requested again
+        // Watchlist entries also have mediaInfo; unknown or deleted media can be requested.
         if (status == null || status <= 1 || status === 7) {
             return { requested: false, label: defaultLabel };
         }
