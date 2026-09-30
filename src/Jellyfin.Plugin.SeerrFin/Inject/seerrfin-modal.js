@@ -930,18 +930,25 @@ window.seerrFinLog = window.seerrFinLog || {
         return `
             <div class="bst-quality-wrapper">
                 <div class="bst-quality-backdrop"></div>
-                <div class="bst-quality-panel" role="dialog" aria-modal="true">
+                <div class="bst-quality-panel" role="dialog" aria-modal="true" aria-labelledby="bst-quality-title">
                     <div class="bst-quality-header">
                         <h3 id="bst-quality-title">${title}</h3>
                         <button type="button" class="bst-quality-close" aria-label="Close">${CLOSE_ICON}</button>
                     </div>
                     <div class="bst-quality-list"><div class="bst-quality-loading">Loading profiles…</div></div>
+                    <div class="bst-quality-footer" hidden>
+                        <button type="button" class="bst-quality-continue" disabled>${is4k ? 'Request 4K' : 'Request'}</button>
+                    </div>
                 </div>
             </div>`;
     }
 
     function renderQualityOptions(options) {
-        return options.map(function (opt) {
+        const defaultOption = options.find(function (opt) { return opt.isDefault && opt.isDefaultProfile; });
+        const orderedOptions = defaultOption
+            ? [defaultOption].concat(options.filter(function (opt) { return opt !== defaultOption; }))
+            : options;
+        return orderedOptions.map(function (opt) {
             const label = escapeHtml(opt.profileName || 'Default');
             const subParts = [];
             if (opt.serverName) {
@@ -950,17 +957,14 @@ window.seerrFinLog = window.seerrFinLog || {
             if (opt.is4k) {
                 subParts.push('4K');
             }
-            if (opt.isDefaultProfile) {
-                subParts.push('default');
-            }
             const subHtml = subParts.length ? `<span class="bst-quality-option-sub">${escapeHtml(subParts.join(' · '))}</span>` : '';
             return `
-                <button type="button" class="bst-quality-option"
-                    data-server-id="${opt.serverId}" data-profile-id="${opt.profileId}"
-                    data-root-folder="${escapeHtml(opt.rootFolder || '')}" data-is-4k="${opt.is4k ? '1' : '0'}">
-                    ${label}
-                    ${subHtml}
-                </button>`;
+                <label class="bst-quality-option">
+                    <input type="radio" class="bst-quality-radio" name="bst-quality-profile"${opt === defaultOption ? ' checked' : ''}
+                        data-server-id="${opt.serverId}" data-profile-id="${opt.profileId}"
+                        data-root-folder="${escapeHtml(opt.rootFolder || '')}" data-is-4k="${opt.is4k ? '1' : '0'}" />
+                    <span>${label}${opt === defaultOption ? ' (Default)' : ''}${subHtml}</span>
+                </label>`;
         }).join('');
     }
 
@@ -981,6 +985,8 @@ window.seerrFinLog = window.seerrFinLog || {
         activeQualityRoot = document.body.lastElementChild;
 
         const list = activeQualityRoot.querySelector('.bst-quality-list');
+        const footer = activeQualityRoot.querySelector('.bst-quality-footer');
+        const requestBtn = footer.querySelector('.bst-quality-continue');
         activeQualityRoot.querySelector('.bst-quality-backdrop').addEventListener('click', closeQualityModal);
         activeQualityRoot.querySelector('.bst-quality-close').addEventListener('click', closeQualityModal);
 
@@ -997,6 +1003,7 @@ window.seerrFinLog = window.seerrFinLog || {
                 return;
             }
             list.innerHTML = `<div class="bst-quality-empty">${escapeHtml(message || 'Request failed')}</div>`;
+            footer.hidden = true;
         }
 
         ApiClient.ajax({
@@ -1021,6 +1028,7 @@ window.seerrFinLog = window.seerrFinLog || {
                         profileName: opt.profileName || opt.ProfileName || '',
                         rootFolder: opt.rootFolder || opt.RootFolder || '',
                         is4k: !!(opt.is4k != null ? opt.is4k : opt.Is4k),
+                        isDefault: !!(opt.isDefault != null ? opt.isDefault : opt.IsDefault),
                         isDefaultProfile: !!(opt.isDefaultProfile != null ? opt.isDefaultProfile : opt.IsDefaultProfile)
                     };
                 }).filter(Boolean),
@@ -1046,32 +1054,41 @@ window.seerrFinLog = window.seerrFinLog || {
                 return;
             }
 
-            let filteredOptions = payload.options.filter(function (opt) {
+            const filteredOptions = payload.options.filter(function (opt) {
                 return !!opt.is4k === is4k;
             });
             if (!filteredOptions.length) {
-                filteredOptions = payload.options;
+                failRequest(is4k ? 'No 4K quality profiles available.' : 'No quality profiles available.');
+                return;
             }
 
             list.innerHTML = renderQualityOptions(filteredOptions);
+            list.setAttribute('role', 'radiogroup');
+            list.setAttribute('aria-labelledby', 'bst-quality-title');
+            footer.hidden = false;
+            requestBtn.disabled = !list.querySelector('.bst-quality-radio:checked');
 
-            list.addEventListener('click', function (event) {
-                const btn = event.target.closest('.bst-quality-option');
-                if (!btn || btn.disabled) {
+            list.addEventListener('change', function () {
+                requestBtn.disabled = !list.querySelector('.bst-quality-radio:checked');
+            });
+
+            requestBtn.addEventListener('click', function () {
+                const selected = list.querySelector('.bst-quality-radio:checked');
+                if (!selected || requestBtn.disabled) {
                     return;
                 }
 
-                btn.disabled = true;
+                requestBtn.disabled = true;
+                list.innerHTML = `<div class="bst-quality-loading">Submitting request…</div>`;
                 submitRequest(mediaId, mediaType, {
-                    serverId: parseInt(btn.getAttribute('data-server-id'), 10),
-                    profileId: parseInt(btn.getAttribute('data-profile-id'), 10),
-                    rootFolder: btn.getAttribute('data-root-folder') || null,
-                    is4k: btn.getAttribute('data-is-4k') === '1',
+                    serverId: parseInt(selected.getAttribute('data-server-id'), 10),
+                    profileId: parseInt(selected.getAttribute('data-profile-id'), 10),
+                    rootFolder: selected.getAttribute('data-root-folder') || null,
+                    is4k: selected.getAttribute('data-is-4k') === '1',
                     seasons: selectedSeasons
-                }, finishRequest, failRequest).catch(function () {
-                    btn.disabled = false;
-                });
+                }, finishRequest, failRequest).catch(function () {});
             });
+            (list.querySelector('.bst-quality-radio:checked') || list.querySelector('.bst-quality-radio')).focus();
         }).catch(function (err) {
             log.error('profiles load failed', err);
             failRequest('Failed to load quality profiles.');

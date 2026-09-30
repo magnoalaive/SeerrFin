@@ -719,6 +719,30 @@
     border-color: var(--bst-border-primary);
 }
 
+label.bst-quality-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-sizing: border-box;
+}
+
+.bst-quality-radio {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    accent-color: var(--bst-accent);
+}
+
+.bst-quality-option:has(.bst-quality-radio:checked) {
+    border-color: var(--bst-accent);
+    background: var(--bst-bg-secondary-hover);
+}
+
+label.bst-quality-option:focus-within {
+    outline: 2px solid var(--bst-accent);
+    outline-offset: 2px;
+}
+
 .bst-quality-option-sub {
     display: block;
     font-size: 0.75rem;
