@@ -1604,6 +1604,7 @@ if (typeof window.seerrFinPlugin === 'undefined') {
                     includeSpecialsSeason: self.readAdvancedBool(requestModal.includeSpecialsSeason ?? requestModal.IncludeSpecialsSeason, false),
                     requireExplicitSeasonSelection: self.readAdvancedBool(requestModal.requireExplicitSeasonSelection ?? requestModal.RequireExplicitSeasonSelection, false),
                     showRequest4kButton: self.readAdvancedBool(requestModal.showRequest4kButton ?? requestModal.ShowRequest4kButton, true),
+                    showRootFolderSelector: self.readAdvancedBool(requestModal.showRootFolderSelector ?? requestModal.ShowRootFolderSelector, false),
                     backdropLanguageFilter: requestModal.backdropLanguageFilter || requestModal.BackdropLanguageFilter || 'en,null,en-US'
                 },
                 tmdb: {

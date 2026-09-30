@@ -192,11 +192,15 @@ public class JellyseerrRequestService
                 JObject detail = JObject.Parse(detailRaw);
                 JObject serverDetails = detail.Value<JObject>("server") ?? server;
                 JArray? profiles = detail.Value<JArray>("profiles");
-                string? defaultRootFolder = serverDetails.Value<string>("activeDirectory")
-                    ?? detail.Value<JArray>("rootFolders")?
+                string[] rootFolders = detail.Value<JArray>("rootFolders")?
                     .OfType<JObject>()
-                    .FirstOrDefault()?
-                    .Value<string>("path");
+                    .Select(folder => folder.Value<string>("path"))
+                    .OfType<string>()
+                    .Where(path => !string.IsNullOrWhiteSpace(path))
+                    .Distinct()
+                    .ToArray() ?? Array.Empty<string>();
+                string? defaultRootFolder = serverDetails.Value<string>("activeDirectory")
+                    ?? rootFolders.FirstOrDefault();
 
                 if (profiles == null || profiles.Count == 0)
                 {
@@ -222,7 +226,8 @@ public class JellyseerrRequestService
                         ["isDefaultProfile"] = defaultProfileId == profileId,
                         ["profileId"] = profileId,
                         ["profileName"] = profile.Value<string>("name") ?? $"Profile {profileId}",
-                        ["rootFolder"] = defaultRootFolder
+                        ["rootFolder"] = defaultRootFolder,
+                        ["rootFolders"] = new JArray(rootFolders)
                     });
                 }
             }

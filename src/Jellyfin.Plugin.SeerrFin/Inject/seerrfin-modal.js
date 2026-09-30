@@ -60,6 +60,7 @@ window.seerrFinLog = window.seerrFinLog || {
             includeSpecialsSeason: readAdvancedBool(modal && modal.includeSpecialsSeason, false),
             requireExplicitSeasonSelection: readAdvancedBool(modal && modal.requireExplicitSeasonSelection, false),
             showRequest4kButton: readAdvancedBool(modal && modal.showRequest4kButton, true),
+            showRootFolderSelector: readAdvancedBool(modal && modal.showRootFolderSelector, false),
             backdropLanguageFilter: (modal && modal.backdropLanguageFilter) || 'en,null,en-US'
         };
     }
@@ -937,6 +938,10 @@ window.seerrFinLog = window.seerrFinLog || {
                     </div>
                     <div class="bst-quality-list"><div class="bst-quality-loading">Loading profiles…</div></div>
                     <div class="bst-quality-footer" hidden>
+                        <div class="bst-root-folder-field" hidden>
+                            <label for="bst-root-folder">Root folder</label>
+                            <select id="bst-root-folder" class="bst-root-folder-select"></select>
+                        </div>
                         <button type="button" class="bst-quality-continue" disabled>${is4k ? 'Request 4K' : 'Request'}</button>
                     </div>
                 </div>
@@ -961,8 +966,7 @@ window.seerrFinLog = window.seerrFinLog || {
             return `
                 <label class="bst-quality-option">
                     <input type="radio" class="bst-quality-radio" name="bst-quality-profile"${opt === defaultOption ? ' checked' : ''}
-                        data-server-id="${opt.serverId}" data-profile-id="${opt.profileId}"
-                        data-root-folder="${escapeHtml(opt.rootFolder || '')}" data-is-4k="${opt.is4k ? '1' : '0'}" />
+                        data-server-id="${opt.serverId}" data-profile-id="${opt.profileId}" />
                     <span>${label}${opt === defaultOption ? ' (Default)' : ''}${subHtml}</span>
                 </label>`;
         }).join('');
@@ -987,6 +991,8 @@ window.seerrFinLog = window.seerrFinLog || {
         const list = activeQualityRoot.querySelector('.bst-quality-list');
         const footer = activeQualityRoot.querySelector('.bst-quality-footer');
         const requestBtn = footer.querySelector('.bst-quality-continue');
+        const rootFolderField = footer.querySelector('.bst-root-folder-field');
+        const rootFolderSelect = footer.querySelector('.bst-root-folder-select');
         activeQualityRoot.querySelector('.bst-quality-backdrop').addEventListener('click', closeQualityModal);
         activeQualityRoot.querySelector('.bst-quality-close').addEventListener('click', closeQualityModal);
 
@@ -1027,6 +1033,7 @@ window.seerrFinLog = window.seerrFinLog || {
                         profileId: opt.profileId != null ? opt.profileId : opt.ProfileId,
                         profileName: opt.profileName || opt.ProfileName || '',
                         rootFolder: opt.rootFolder || opt.RootFolder || '',
+                        rootFolders: opt.rootFolders || opt.RootFolders || [],
                         is4k: !!(opt.is4k != null ? opt.is4k : opt.Is4k),
                         isDefault: !!(opt.isDefault != null ? opt.isDefault : opt.IsDefault),
                         isDefaultProfile: !!(opt.isDefaultProfile != null ? opt.isDefaultProfile : opt.IsDefaultProfile)
@@ -1066,25 +1073,51 @@ window.seerrFinLog = window.seerrFinLog || {
             list.setAttribute('role', 'radiogroup');
             list.setAttribute('aria-labelledby', 'bst-quality-title');
             footer.hidden = false;
-            requestBtn.disabled = !list.querySelector('.bst-quality-radio:checked');
+            let selectedOption = null;
 
-            list.addEventListener('change', function () {
-                requestBtn.disabled = !list.querySelector('.bst-quality-radio:checked');
-            });
+            function updateSelection() {
+                const selected = list.querySelector('.bst-quality-radio:checked');
+                const option = selected && filteredOptions.find(function (opt) {
+                    return String(opt.serverId) === selected.dataset.serverId && String(opt.profileId) === selected.dataset.profileId;
+                });
+                const previousFolder = option && selectedOption && option.serverId === selectedOption.serverId
+                    ? rootFolderSelect.value : option && option.rootFolder;
+                selectedOption = option;
+                rootFolderField.hidden = !getRequestModalAdvanced().showRootFolderSelector || !option || !option.rootFolders.length;
+                rootFolderSelect.replaceChildren();
+                if (!rootFolderField.hidden) {
+                    option.rootFolders.forEach(function (path) {
+                        rootFolderSelect.add(new Option(path, path));
+                    });
+                    rootFolderSelect.value = previousFolder || '';
+                    if (!rootFolderSelect.value) {
+                        rootFolderSelect.add(new Option('Choose a root folder', '', true, true), 0);
+                    }
+                }
+                updateRequestButton();
+            }
+
+            function updateRequestButton() {
+                requestBtn.disabled = !selectedOption || (!rootFolderField.hidden && !rootFolderSelect.value);
+            }
+
+            updateSelection();
+            list.addEventListener('change', updateSelection);
+            rootFolderSelect.addEventListener('change', updateRequestButton);
 
             requestBtn.addEventListener('click', function () {
-                const selected = list.querySelector('.bst-quality-radio:checked');
-                if (!selected || requestBtn.disabled) {
+                if (!selectedOption || requestBtn.disabled) {
                     return;
                 }
 
                 requestBtn.disabled = true;
+                rootFolderSelect.disabled = true;
                 list.innerHTML = `<div class="bst-quality-loading">Submitting request…</div>`;
                 submitRequest(mediaId, mediaType, {
-                    serverId: parseInt(selected.getAttribute('data-server-id'), 10),
-                    profileId: parseInt(selected.getAttribute('data-profile-id'), 10),
-                    rootFolder: selected.getAttribute('data-root-folder') || null,
-                    is4k: selected.getAttribute('data-is-4k') === '1',
+                    serverId: selectedOption.serverId,
+                    profileId: selectedOption.profileId,
+                    rootFolder: rootFolderField.hidden ? selectedOption.rootFolder : rootFolderSelect.value,
+                    is4k: selectedOption.is4k,
                     seasons: selectedSeasons
                 }, finishRequest, failRequest).catch(function () {});
             });

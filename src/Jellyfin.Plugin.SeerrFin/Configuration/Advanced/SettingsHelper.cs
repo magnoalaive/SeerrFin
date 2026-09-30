@@ -216,6 +216,7 @@ public static class AdvancedSettingsHelper
                 includeSpecialsSeason = advanced.RequestModal.IncludeSpecialsSeason,
                 requireExplicitSeasonSelection = advanced.RequestModal.RequireExplicitSeasonSelection,
                 showRequest4kButton = advanced.RequestModal.ShowRequest4kButton,
+                showRootFolderSelector = advanced.RequestModal.ShowRootFolderSelector,
                 backdropLanguageFilter = advanced.Tmdb.BackdropLanguageFilter
             },
             tmdb = new

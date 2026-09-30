@@ -1469,6 +1469,13 @@
                             </div>
                             <label class="bst-toggle"><input id="advShowRequest4kButton" type="checkbox" checked /><span class="bst-toggle-slider"></span></label>
                         </div>
+                        <div class="bst-toggle-row">
+                            <div class="bst-toggle-copy">
+                                <label class="bst-toggle-label" for="advShowRootFolderSelector">Show root folder selector</label>
+                                <div class="bst-field-desc">Let users with Seerr advanced request permissions choose a Radarr or Sonarr root folder when requesting.</div>
+                            </div>
+                            <label class="bst-toggle"><input id="advShowRootFolderSelector" type="checkbox" /><span class="bst-toggle-slider"></span></label>
+                        </div>
                             </div>
                         </div>
 
@@ -2387,7 +2394,8 @@
                         TvSeasonPickerEnabled: true,
                         IncludeSpecialsSeason: false,
                         RequireExplicitSeasonSelection: false,
-                        ShowRequest4kButton: true
+                        ShowRequest4kButton: true,
+                        ShowRootFolderSelector: false
                     },
                     Servarr: {
                         DownloadedProgressIsActive: true,
@@ -2491,6 +2499,7 @@
                 document.querySelector('#advIncludeSpecialsSeason').checked = m.IncludeSpecialsSeason === true;
                 document.querySelector('#advRequireExplicitSeasonSelection').checked = m.RequireExplicitSeasonSelection === true;
                 document.querySelector('#advShowRequest4kButton').checked = m.ShowRequest4kButton !== false;
+                document.querySelector('#advShowRootFolderSelector').checked = m.ShowRootFolderSelector === true;
 
                 const s = advanced.Servarr;
                 document.querySelector('#advDownloadedProgressIsActive').checked = s.DownloadedProgressIsActive !== false;
@@ -2563,7 +2572,8 @@
                         TvSeasonPickerEnabled: document.querySelector('#advTvSeasonPickerEnabled').checked,
                         IncludeSpecialsSeason: document.querySelector('#advIncludeSpecialsSeason').checked,
                         RequireExplicitSeasonSelection: document.querySelector('#advRequireExplicitSeasonSelection').checked,
-                        ShowRequest4kButton: document.querySelector('#advShowRequest4kButton').checked
+                        ShowRequest4kButton: document.querySelector('#advShowRequest4kButton').checked,
+                        ShowRootFolderSelector: document.querySelector('#advShowRootFolderSelector').checked
                     },
                     Servarr: {
                         DownloadedProgressIsActive: document.querySelector('#advDownloadedProgressIsActive').checked,

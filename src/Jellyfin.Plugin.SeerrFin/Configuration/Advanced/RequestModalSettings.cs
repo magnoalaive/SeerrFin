@@ -9,4 +9,6 @@ public class AdvancedRequestModalSettings
     public bool RequireExplicitSeasonSelection { get; set; }
 
     public bool ShowRequest4kButton { get; set; } = true;
+
+    public bool ShowRootFolderSelector { get; set; }
 }

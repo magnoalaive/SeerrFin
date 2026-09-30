@@ -763,6 +763,33 @@ label.bst-quality-option:focus-within {
     border-top: 1px solid var(--bst-border-primary);
 }
 
+.bst-root-folder-field {
+    margin-bottom: 0.75rem;
+}
+
+.bst-root-folder-field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--bst-type-secondary);
+    font-size: 0.875rem;
+}
+
+.bst-root-folder-select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--bst-border-primary);
+    border-radius: 0.5rem;
+    background: var(--bst-bg-secondary);
+    color: var(--bst-type-primary);
+    font: inherit;
+}
+
+.bst-root-folder-select:focus-visible {
+    outline: 2px solid var(--bst-accent);
+    outline-offset: 2px;
+}
+
 .bst-quality-continue {
     display: block;
     width: 100%;
