@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novidades ASC · Chimi+</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f141b;color:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% -30%,#283747,transparent 55%),#0f141b}
+a{color:inherit;text-decoration:none}header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:22px;padding:15px max(22px,calc((100vw - 1450px)/2));background:#111820ec;border-bottom:1px solid #303a46;backdrop-filter:blur(20px)}
+.logo{font-size:21px;font-weight:850;letter-spacing:-1px}.logo b{color:#66b5ff}.back{font-size:13px;color:#9eb1c6}
+main{max-width:1450px;margin:auto;padding:40px 22px 80px}
+h1{font-size:clamp(27px,3vw,42px);letter-spacing:-1.2px;margin:0 0 8px}.description{color:#acbdce;margin-bottom:28px;line-height:1.6}
+.toolbar{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:22px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}.filter{padding:9px 14px;border:1px solid #354557;border-radius:22px;background:#1c2632;color:#c1cfdb;cursor:pointer;font-weight:600}
+.filter.active{background:#194a74;border-color:#3988d7;color:white}
+small{color:#96a8ba}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:17px}
+.card{background:#19222d;border:1px solid #303c4c;border-radius:13px;overflow:hidden;min-width:0;transition:transform .18s,border-color .18s;display:block}
+.card:hover{transform:translateY(-3px);border-color:#5aabf9}
+.art{height:260px;display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;background:linear-gradient(145deg,#293b4c,#202732 65%,#142337);position:relative;overflow:hidden}
+.art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.art .fallback{font-size:21px;line-height:1.2;font-weight:750;text-shadow:0 1px 12px #0009}
+.chips{position:absolute;left:8px;bottom:9px;display:flex;gap:4px;flex-wrap:wrap;z-index:1}
+.chip{padding:4px 6px;border-radius:5px;background:#153e63;color:#d5edff;font-size:10px;font-weight:800}
+.chip.hdr{background:#795e16;color:#ffeba8}.info{padding:12px}.name{font-size:14px;font-weight:750;min-height:38px;line-height:1.35}
+.meta{font-size:12px;color:#a8b7c7;margin:8px 0 3px}
+.empty{padding:26px;color:#b8c8d7;border:1px dashed #405166;border-radius:12px}
+footer{padding-top:25px;color:#94a8bd;font-size:12px;line-height:1.6}
+@media(max-width:600px){main{padding:23px 13px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.art{height:225px}.info{padding:9px}header{padding:14px}}
+</style></head>
+<body><header><a class="logo" href="/"><b>Chimi</b>+</a><a class="back" href="/">← Voltar ao catálogo</a></header>
+<main><h1>Novidades no ASC</h1>
+<p class="description">Filmes publicados recentemente no Amigos Share Club, agrupados por título. Aqui você vê as qualidades realmente anunciadas no tracker, não apenas tendências gerais.</p>
+<div class="toolbar"><div class="filters" id="filters"><button class="filter active" data-quality="Todos">Todos</button><button class="filter" data-quality="4K">4K</button><button class="filter" data-quality="1080p">1080p</button><button class="filter" data-quality="720p">720p</button></div><small id="updated">Carregando lançamentos...</small></div>
+<div id="grid" class="grid" aria-live="polite"></div>
+<footer>Fonte: ASC, via Prowlarr. Atualização em cache de até 1 hora. A presença de um release não garante disponibilidade permanente, conectividade ou conclusão do download. Clique em um título para procurar sua ficha no Chimi+.</footer>
+</main><script defer src="/_chimi/asc.js"></script></body></html>
