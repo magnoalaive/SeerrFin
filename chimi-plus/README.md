@@ -1,6 +1,8 @@
 # Chimi+ custom integration
 
-This directory snapshots the custom Chimi+ layer currently deployed around Seerr/Jellyseerr on the Alaive Server.
+This directory mirrors the custom Chimi+ layer deployed around Seerr/Jellyseerr on the Alaive Server.
+
+The operational source of truth is `magnoalaive/alaive-server-infra`, under `infrastructure/chimiplus/availability/`. This directory is a reproducible snapshot for the SeerrFin repository and must not be treated as the canonical runtime copy.
 
 ## Purpose
 
@@ -16,9 +18,12 @@ The custom layer adds:
 
 The deployed server keeps this code outside the upstream Seerr application and injects it through the Chimi+ reverse proxy. This reduces coupling with upstream updates.
 
-Current runtime source on the server:
+Canonical runtime source:
 
-`/Users/maguziserver/AlaiveServer/infrastructure/chimiplus/availability/`
+- GitHub: `magnoalaive/alaive-server-infra/infrastructure/chimiplus/availability/`
+- Server: `/Users/maguziserver/AlaiveServer/infrastructure/chimiplus/availability/`
+
+When the runtime layer changes, sync this snapshot from the canonical infrastructure repository rather than editing both independently.
 
 ## Secrets
 

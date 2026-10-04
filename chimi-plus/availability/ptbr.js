@@ -20,6 +20,8 @@
     'Request Now':'Solicitar agora', 'Cancel':'Cancelar', 'Submit':'Confirmar',
     'Advanced':'Avançado', 'Quality Profile':'Perfil de qualidade',
     'Root Folder':'Pasta raiz', 'Select Season(s)':'Selecione a(s) temporada(s)',
+    'Choose quality profile':'Escolha o perfil de qualidade',
+    'No seasons available to request':'As temporadas disponíveis já foram solicitadas.',
     'Season':'Temporada', 'Seasons':'Temporadas', 'Episodes':'Episódios',
     'Status':'Estado', 'Not Requested':'Não solicitada',
     'Available':'Disponível', 'Pending':'Pendente', 'Processing':'Processando',

@@ -69,6 +69,8 @@
       grid.append(empty);return;
     }
     const cards=visible.map(makeCard);
+    // Resolve todos os cards, progressivamente, sem novas buscas no ASC.
+    // Limite de duas pesquisas simultâneas no Seerr.
     (async()=> {
       let next=0;
       await Promise.all(Array.from({length:2},async()=>{
