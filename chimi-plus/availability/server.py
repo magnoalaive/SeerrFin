@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Chimi+ release availability: read-only authenticated, on-demand Prowlarr search."""
-import json, os, re, time, threading, urllib.request, urllib.parse, urllib.error, unicodedata, xml.etree.ElementTree as ET
+import json, os, re, time, threading, urllib.request, urllib.parse, urllib.error, unicodedata, xml.etree.ElementTree as ET, html
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import catalog_feed
@@ -12,6 +13,10 @@ CACHE = {}
 LOCK = threading.Lock()
 TTL = 900
 MAX = 100
+ASC_UPSTREAM = 'https://amigos-share.club'
+ASC_RESOLUTION_CACHE = {}
+ASC_RESOLUTION_LOCK = threading.Lock()
+ASC_RESOLUTION_TTL = 7 * 24 * 3600
 
 def get_json(url, headers, timeout=12):
     with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=timeout) as res:
@@ -23,6 +28,7 @@ def normalized(s):
     return re.sub(r'[^a-z0-9]+', ' ', s).strip()
 
 def matching(release, title, year):
+    # Match complete leading movie title + explicit release year; prevent homonym false positives.
     name = normalized(release)
     key = normalized(title)
     return bool(re.match(r'^' + re.escape(key) + r'\s+' + re.escape(str(year)) + r'(?:\s|$)', name))
@@ -41,6 +47,113 @@ def quality(name):
     if re.search(r'480p|576p|\bsd\b', name): return 'SD'
     return 'Outros'
 
+def asc_headers(cookie, user_agent=''):
+    return {
+        'Cookie': cookie,
+        'User-Agent': user_agent or 'Mozilla/5.0 Chimi-ASC-Proxy',
+        'Accept': 'text/html,application/xhtml+xml,application/octet-stream,*/*;q=0.8',
+        'Accept-Encoding': 'identity',
+    }
+
+def asc_get(path, query, cookie, user_agent='', timeout=15):
+    url = ASC_UPSTREAM + path + (('?' + query) if query else '')
+    request = urllib.request.Request(url, headers=asc_headers(cookie, user_agent))
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return response.status, response.headers, response.read()
+    except urllib.error.HTTPError as error:
+        return error.code, error.headers, error.read()
+
+def parse_inertia_page(body):
+    text = body.decode('utf-8', 'replace')
+    match = re.search(r'(<script[^>]+data-page=[\"\']app[\"\'][^>]*>)(.*?)(</script>)', text, re.S | re.I)
+    if not match:
+        raise ValueError('Inertia data-page script not found')
+    payload = match.group(2)
+    try:
+        return text, match, json.loads(payload), False
+    except json.JSONDecodeError:
+        return text, match, json.loads(html.unescape(payload)), True
+
+def find_torrent_rows(value):
+    if isinstance(value, dict):
+        torrents = value.get('torrents')
+        if isinstance(torrents, dict) and isinstance(torrents.get('data'), list):
+            return torrents['data']
+        for child in value.values():
+            found = find_torrent_rows(child)
+            if found is not None: return found
+    elif isinstance(value, list):
+        for child in value:
+            found = find_torrent_rows(child)
+            if found is not None: return found
+    return None
+
+def normalize_resolution(value):
+    if value is None: return None
+    text = json.dumps(value, ensure_ascii=False) if isinstance(value, (dict, list)) else str(value)
+    text = text.lower()
+    if re.search(r'2160|\b4k\b|uhd', text): return '2160p'
+    if '1080' in text: return '1080p'
+    if '720' in text: return '720p'
+    if '576' in text: return '576p'
+    if '480' in text: return '480p'
+    return None
+
+def asc_resolution(torrent_id, cookie, user_agent=''):
+    now = time.monotonic()
+    with ASC_RESOLUTION_LOCK:
+        cached = ASC_RESOLUTION_CACHE.get(torrent_id)
+        if cached and now - cached[0] < ASC_RESOLUTION_TTL:
+            return cached[1]
+    status, _, body = asc_get('/torrents/' + str(torrent_id), '', cookie, user_agent, 12)
+    resolution = None
+    if status == 200:
+        try:
+            _, _, page, _ = parse_inertia_page(body)
+            torrent = (page.get('props') or {}).get('torrent') or {}
+            attributes = torrent.get('attributes') or {}
+            raw_resolution = attributes.get('resolution')
+            resolution = normalize_resolution(raw_resolution)
+            if not resolution:
+                description = json.dumps(torrent.get('descriptionTree') or [], ensure_ascii=False)
+                resolution = normalize_resolution(description)
+        except Exception:
+            resolution = None
+    with ASC_RESOLUTION_LOCK:
+        if len(ASC_RESOLUTION_CACHE) > 1000: ASC_RESOLUTION_CACHE.clear()
+        ASC_RESOLUTION_CACHE[torrent_id] = (now, resolution)
+    return resolution
+
+def enrich_asc_search(body, cookie, user_agent=''):
+    text, match, page, entity_encoded = parse_inertia_page(body)
+    rows = find_torrent_rows(page) or []
+    pending = []
+    for row in rows:
+        if not isinstance(row, dict): continue
+        badges = row.get('badges') if isinstance(row.get('badges'), list) else []
+        if any(isinstance(badge, dict) and (badge.get('kind') == 'resolution' or normalize_resolution(badge.get('label'))) for badge in badges):
+            continue
+        torrent_id = row.get('id')
+        if isinstance(torrent_id, int) and torrent_id > 0:
+            pending.append((torrent_id, row))
+    enriched = 0
+    if pending:
+        with ThreadPoolExecutor(max_workers=min(6, len(pending))) as pool:
+            futures = {pool.submit(asc_resolution, torrent_id, cookie, user_agent): row for torrent_id, row in pending}
+            for future in as_completed(futures):
+                resolution = future.result()
+                if not resolution: continue
+                row = futures[future]
+                badges = row.get('badges') if isinstance(row.get('badges'), list) else []
+                row['badges'] = [{'label': resolution, 'kind': 'resolution'}] + badges
+                enriched += 1
+    if not enriched: return body, 0
+    payload = json.dumps(page, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
+    if entity_encoded: payload = html.escape(payload, quote=True)
+    updated = text[:match.start(2)] + payload + text[match.end(2):]
+    return updated.encode('utf-8'), enriched
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print('%s %s' % (self.log_date_time_string(), fmt % args),flush=True)
@@ -53,8 +166,37 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Content-Length',str(len(b)))
         self.end_headers()
         self.wfile.write(b)
+    def proxy_asc(self, parsed):
+        path = parsed.path
+        if path != '/dashboard' and path != '/torrents' and not re.fullmatch(r'/torrents/\d+(?:/download)?', path):
+            return self.send(404, {'error':'not found'})
+        cookie = self.headers.get('Cookie','')
+        if not cookie or len(cookie) > 16384:
+            return self.send(401, {'error':'ASC cookie required'})
+        try:
+            status, headers, body = asc_get(path, parsed.query, cookie, self.headers.get('User-Agent',''), 20)
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            print('ASC proxy failed:', type(error).__name__, flush=True)
+            return self.send(502, {'error':'ASC temporarily unavailable'})
+        if status == 200 and path == '/torrents':
+            try:
+                body, enriched = enrich_asc_search(body, cookie, self.headers.get('User-Agent',''))
+                if enriched: print('ASC metadata enriched:', enriched, 'release(s)', flush=True)
+            except Exception as error:
+                print('ASC enrichment skipped:', type(error).__name__, flush=True)
+        self.send_response(status)
+        self.send_header('Content-Type', headers.get('Content-Type','application/octet-stream'))
+        disposition = headers.get('Content-Disposition')
+        if disposition: self.send_header('Content-Disposition', disposition)
+        self.send_header('Cache-Control','private, no-store')
+        self.send_header('X-Content-Type-Options','nosniff')
+        self.send_header('Content-Length',str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
     def do_GET(self):
         p=urllib.parse.urlparse(self.path)
+        if p.path == '/dashboard' or p.path == '/torrents' or re.fullmatch(r'/torrents/\d+(?:/download)?', p.path):
+            return self.proxy_asc(p)
         if p.path == '/healthz': return self.send(200,{'status':'ok'})
         if p.path == '/catalog':
             cookie=self.headers.get('Cookie','')
