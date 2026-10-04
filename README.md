@@ -23,6 +23,16 @@ The best way to discover and request Movies and TV Shows by using Seerr directly
 
 ---
 
+## Alaive / Chimi+ custom layer
+
+Este fork também versiona a camada custom usada pelo Chimi+ no Alaive Server. Ela fica isolada em `chimi-plus/` para reduzir acoplamento com o SeerrFin upstream.
+
+Documentação técnica: [`docs/chimi-plus-unified-search.md`](docs/chimi-plus-unified-search.md).
+
+Regra operacional: mudanças em `chimi-plus/` não devem ser confundidas com o backlog genérico/upstream do SeerrFin e não devem incluir credenciais, bancos, caches ou dados de runtime.
+
+---
+
 ## Features
 - **Movie and TV tabs**: New tabs for discovering movies and TV shows directly in Jellyfin
 - **Discovery sections**: Carousels sorting movies/tv shows to be discovered by (eg. Trending, Popular, etc.)

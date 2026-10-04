@@ -1,3 +1,7 @@
+# Backlog genérico / upstream
+# Este arquivo não representa as pendências operacionais do Chimi+ Alaive.
+# Para a integração Chimi+, consulte chimi-plus/README.md e docs/chimi-plus-unified-search.md.
+
 - show progress/playability on cards in discover pages and let user play directly from there
 - add layout editor for modal
 - add layout editor for carousel pages
