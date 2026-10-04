@@ -184,6 +184,8 @@ Antes de considerar o fluxo concluído:
 
 ## Observação sobre versionamento
 
-Esta documentação descreve o fluxo Chimi+ implantado/planejado para a busca unificada. A branch `feat/chimi-unified-search` deve conter somente alterações reproduzíveis e auditáveis relacionadas a este recurso.
+Esta documentação descreve o fluxo Chimi+ implantado e sua arquitetura esperada.
 
-Mudanças locais de servidor, credenciais, volumes privados e estado de runtime não devem ser commitados.
+A fonte operacional canônica do runtime é o repositório `magnoalaive/alaive-server-infra`, em `infrastructure/chimiplus/availability/`. A pasta `chimi-plus/availability/` deste repositório é apenas um snapshot reproduzível dessa camada.
+
+Mudanças de runtime devem nascer no repositório de infraestrutura e depois ser sincronizadas para este snapshot. Credenciais, volumes privados, caches, logs e estado de execução não devem ser commitados.
