@@ -3,6 +3,7 @@
   'use strict';
   let homepageRequested=false, scheduled=false;
   function addNav() {
+    // Independent of Seerr header markup: a persistent catalogue shortcut.
     if(!document.getElementById('chimi-asc-nav')) {
       const link=document.createElement('a');
       link.id='chimi-asc-nav';
